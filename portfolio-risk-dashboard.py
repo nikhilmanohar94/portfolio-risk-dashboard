@@ -38,8 +38,15 @@ numeric_df = df.select_dtypes(include=np.number)
 st.subheader("1. Preview of Data")
 st.dataframe(df.head())
 st.markdown(
-    "This table shows the first few rows of your dataset. Each column represents an asset's daily returns. "
-    "Ensure your data is clean and in the correct format for accurate analysis."
+    """
+    This table shows the first few rows of your dataset.  
+    Each column corresponds to an asset's daily return, typically calculated as:
+    
+    $$ r_{t} = \\frac{P_t - P_{t-1}}{P_{t-1}} $$
+    
+    where $P_t$ is the asset price at day $t$.  
+    Proper formatting and clean data are essential for accurate portfolio analysis.
+    """
 )
 
 st.subheader("2. Correlation Matrix")
@@ -47,9 +54,22 @@ corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
 st.markdown(
-    "The correlation matrix shows how asset returns move in relation to each other. "
-    "Values close to 1 mean assets move very similarly, while values near -1 indicate they move in opposite directions. "
-    "Diversification benefits come from assets with low or negative correlations."
+    """
+    The correlation matrix quantifies how pairs of asset returns move together.  
+    Correlation values range from -1 to +1:
+    
+    - $+1$ indicates perfect positive correlation (assets move exactly together),
+    - $-1$ indicates perfect negative correlation (assets move exactly opposite),
+    - $0$ means no linear relationship.
+    
+    Mathematically, the Pearson correlation coefficient between assets $i$ and $j$ is:
+    
+    $$ \\rho_{i,j} = \\frac{\\text{Cov}(r_i, r_j)}{\\sigma_i \\sigma_j} $$
+    
+    where Cov is covariance, and $\sigma_i$ and $\sigma_j$ are standard deviations of returns.
+    
+    Assets with low or negative correlation help reduce overall portfolio risk through diversification.
+    """
 )
 
 st.subheader("3. Portfolio Metrics")
@@ -70,13 +90,13 @@ else:
 
     weights = weights / np.sum(weights)
 
-    cov_matrix = numeric_df.cov() * 252
+    cov_matrix = numeric_df.cov() * 252  # Annualized covariance matrix assuming 252 trading days
     port_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
 
     port_returns = numeric_df.dot(weights)
     var_95 = np.percentile(port_returns, 5)
 
-    rf_daily = 0.02 / 252
+    rf_daily = 0.02 / 252  # Annual risk-free rate of 2%
     excess_returns = port_returns - rf_daily
     sharpe_ratio = (excess_returns.mean() / excess_returns.std()) * np.sqrt(252)
 
@@ -86,20 +106,63 @@ else:
     col3.metric("📈 Sharpe Ratio", f"{sharpe_ratio:.2f}")
 
     st.markdown(
-        "**Annualized Volatility:** Measures the portfolio's total risk or how much its returns fluctuate over a year. "
-        "Higher volatility means more uncertainty.\n\n"
-        "**1-Day Value at Risk (VaR) at 95% confidence:** The estimated maximum loss you could expect on 1 day, "
-        "with 95% confidence. For example, a 5% VaR means there is a 5% chance the portfolio will lose more than this on any day.\n\n"
-        "**Sharpe Ratio:** Measures risk-adjusted return — how much excess return you get per unit of risk. "
-        "Higher Sharpe ratios indicate better risk-adjusted performance."
+        """
+        ### Annualized Volatility
+        Measures the portfolio's total risk by quantifying the standard deviation of returns on an annual basis.  
+        It is calculated as:
+
+        $$ \\sigma_p = \\sqrt{\\mathbf{w}^T \\mathbf{\\Sigma} \\mathbf{w}} $$
+
+        where:
+        - $\\mathbf{w}$ is the vector of asset weights,
+        - $\\mathbf{\\Sigma}$ is the annualized covariance matrix of asset returns.
+
+        A higher volatility indicates larger fluctuations and greater risk.
+
+        ---
+
+        ### 1-Day Value at Risk (VaR) at 95% Confidence Level
+        VaR estimates the maximum expected loss over one trading day with 95% confidence, i.e., there's a 5% chance losses exceed this value.
+
+        Computed as the 5th percentile of the portfolio return distribution:
+
+        $$ \\text{VaR}_{95\\%} = -\\text{Percentile}_{5}(r_p) $$
+
+        where $r_p$ are portfolio returns.
+
+        For example, a VaR of 5% means that on 95% of days, losses will not exceed 5%.
+
+        ---
+
+        ### Sharpe Ratio
+        The Sharpe ratio measures the portfolio's risk-adjusted return by comparing excess returns to volatility:
+
+        $$ S = \\frac{E[R_p - R_f]}{\\sigma_p} \\times \\sqrt{252} $$
+
+        where:
+        - $R_p$ = portfolio return,
+        - $R_f$ = risk-free return,
+        - $\\sigma_p$ = standard deviation of portfolio returns,
+        - 252 is annualization factor (trading days).
+
+        A higher Sharpe ratio indicates better returns for the risk taken.
+        """
     )
 
     st.subheader("4. Portfolio Return Distribution")
     fig2 = px.histogram(port_returns, nbins=50, title="Portfolio Return Distribution")
     st.plotly_chart(fig2, use_container_width=True)
     st.markdown(
-        "This histogram shows the distribution of daily portfolio returns. "
-        "It helps visualize the frequency of gains and losses and assess the risk of extreme outcomes."
+        """
+        This histogram shows the frequency distribution of daily portfolio returns.  
+        Key points to note:
+        
+        - The shape indicates how returns are distributed (normal, skewed, etc.).
+        - The center shows average returns.
+        - The tails highlight the probability of extreme losses or gains.
+        
+        Understanding this distribution is essential for assessing downside risk and portfolio behavior.
+        """
     )
 
     st.subheader("5. Cumulative Returns")
@@ -107,6 +170,16 @@ else:
     fig3 = px.line(cum_returns, title="Cumulative Return (Backtest)")
     st.plotly_chart(fig3, use_container_width=True)
     st.markdown(
-        "This line chart shows how your portfolio's value would have grown over time assuming all returns were reinvested. "
-        "It provides a sense of overall performance and growth trajectory."
+        """
+        This chart shows how an initial investment would have grown over time by compounding daily returns:
+
+        $$ V_t = V_0 \\times \\prod_{i=1}^t (1 + r_i) $$
+
+        where:
+        - $V_t$ is portfolio value at time $t$,
+        - $V_0$ is the initial investment (normalized to 1),
+        - $r_i$ are daily portfolio returns.
+
+        It provides a clear picture of growth trends and performance consistency.
+        """
     )
