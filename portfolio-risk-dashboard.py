@@ -6,13 +6,27 @@ import plotly.express as px
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("📊 Portfolio Risk Dashboard")
 
-# Description and instructions
+# Create synthetic sample data if no upload
+def generate_sample_data(num_assets=20, num_days=252*2):  # 2 years daily returns approx
+    np.random.seed(42)
+    # Simulate daily returns ~ Normal with small mean & std dev
+    means = np.random.uniform(0.0001, 0.001, size=num_assets)
+    stds = np.random.uniform(0.01, 0.03, size=num_assets)
+    
+    returns = np.array([
+        np.random.normal(loc=means[i], scale=stds[i], size=num_days)
+        for i in range(num_assets)
+    ]).T
+    
+    columns = [f"Stock_{i+1}" for i in range(num_assets)]
+    return pd.DataFrame(returns, columns=columns)
+
 st.markdown("""
 This interactive app calculates key portfolio risk metrics based on uploaded or sample asset return data.  
 It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
 
 ### 🧭 How to use:
-1. View the default **sample dataset** (daily returns of 4 assets).
+1. View the default **sample dataset** (daily returns of 20 assets).
 2. Adjust the **asset weights** in the sidebar (comma-separated).
 3. Explore metrics, return distribution, and cumulative performance.
 4. (Optional) Upload your own dataset using the sidebar.
@@ -20,17 +34,15 @@ It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility,
 💡 **Expected format**: CSV with numeric daily returns, one asset per column.
 """)
 
-# Sidebar: File uploader
 st.sidebar.header("Upload Returns Data")
 uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
 
-# Load sample data
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.sidebar.success("✅ Custom dataset loaded")
 else:
-    df = pd.read_csv("sample_data.csv")
-    st.sidebar.info("Using built-in sample dataset (AAPL, MSFT, SPY, TSLA)")
+    df = generate_sample_data()
+    st.sidebar.info("Using synthetic sample dataset with 20 stocks")
 
 df.dropna(inplace=True)
 numeric_df = df.select_dtypes(include=np.number)
@@ -74,7 +86,8 @@ st.markdown(
 
 st.subheader("3. Portfolio Metrics")
 
-weights_input = st.sidebar.text_input("Asset Weights (comma-separated)", value="0.25,0.25,0.25,0.25")
+default_weights = ", ".join(["0.05"] * numeric_df.shape[1])
+weights_input = st.sidebar.text_input("Asset Weights (comma-separated)", value=default_weights)
 try:
     weights = np.array([float(w.strip()) for w in weights_input.split(",")])
 except ValueError:
@@ -90,13 +103,13 @@ else:
 
     weights = weights / np.sum(weights)
 
-    cov_matrix = numeric_df.cov() * 252  # Annualized covariance matrix assuming 252 trading days
+    cov_matrix = numeric_df.cov() * 252  # Annualized covariance
     port_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
 
     port_returns = numeric_df.dot(weights)
     var_95 = np.percentile(port_returns, 5)
 
-    rf_daily = 0.02 / 252  # Annual risk-free rate of 2%
+    rf_daily = 0.02 / 252
     excess_returns = port_returns - rf_daily
     sharpe_ratio = (excess_returns.mean() / excess_returns.std()) * np.sqrt(252)
 
