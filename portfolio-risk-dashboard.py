@@ -28,7 +28,7 @@ if uploaded_file:
     st.dataframe(df.head())
 
     st.subheader("2. Correlation Matrix")
-    corr = df.corr()
+    corr = df.select_dtypes(include=np.number).corr()
     fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
     st.plotly_chart(fig1, use_container_width=True)
 
