@@ -57,7 +57,16 @@ else:
     df = returns.copy()
     st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
 
-# Show preview of data
+# Now load market info and show table
+market_info_df = load_market_info(tickers)
+
+st.subheader("Current Market Data for Top 20 S&P 500 Stocks")
+st.dataframe(market_info_df.style.format({
+    "Price": "${:,.2f}",
+    "Market Cap": "${:,.0f}"
+}))
+
+# Then show the raw returns preview
 st.subheader("1. Preview of Return Data")
 st.dataframe(df.head())
 
