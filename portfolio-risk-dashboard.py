@@ -66,9 +66,11 @@ st.markdown(r"""
 Each value in the dataset represents the daily return for a particular asset.  
 Returns are calculated as:
 
-$$ r_t = \frac{P_t - P_{t-1}}{P_{t-1}} $$
+$$
+r_t = \frac{P_t - P_{t-1}}{P_{t-1}}
+$$
 
-where:
+where:  
 - \( P_t \): Price on day \( t \)  
 - \( r_t \): Daily return  
 
@@ -81,8 +83,6 @@ numeric_df = df.select_dtypes(include=np.number)
 corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
-
-st.subheader("2. Correlation Matrix")
 
 st.markdown("The correlation matrix indicates how asset returns move together.")
 st.markdown("It is calculated using the Pearson correlation coefficient:")
@@ -102,7 +102,6 @@ Where:
 Lower or negative correlations between assets improve diversification and reduce portfolio risk.
 """)
 
-
 # --- PORTFOLIO METRICS ---
 st.subheader("3. Portfolio Metrics")
 
@@ -121,7 +120,7 @@ if len(weights) != numeric_df.shape[1]:
 
 weights = weights / np.sum(weights)
 
-cov_matrix = numeric_df.cov() * 252  # Annualize
+cov_matrix = numeric_df.cov() * 252  # Annualize covariance matrix
 port_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
 
 port_returns = numeric_df.dot(weights)
@@ -138,27 +137,23 @@ col1.metric("📉 Annualized Volatility", f"{port_vol:.2%}")
 col2.metric("⚠️ 1-Day VaR (95%)", f"{abs(var_95):.2%}")
 col3.metric("📈 Sharpe Ratio", f"{sharpe_ratio:.2f}")
 
-st.subheader("3. Portfolio Metrics")
-
-# Show Annualized Volatility formula
 st.markdown("### Annualized Volatility")
 st.latex(r"\sigma_p = \sqrt{\mathbf{w}^T \mathbf{\Sigma} \mathbf{w}}")
-st.markdown(f"""
+st.markdown(rf"""
 Measures the total risk of the portfolio, calculated as above.
 
-Where:
-- \( \\mathbf{{w}} \): Vector of asset weights  
-- \( \\mathbf{{\Sigma}} \): Covariance matrix of returns  
-- \( \\sigma_p \): Annualized portfolio volatility
+Where:  
+- \( \mathbf{{w}} \): Vector of asset weights  
+- \( \mathbf{{\Sigma}} \): Covariance matrix of returns  
+- \( \sigma_p \): Annualized portfolio volatility
 
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
 ---
 """)
 
-# VaR formula and explanation
 st.markdown("### Value at Risk (VaR) at 95% Confidence")
 st.latex(r"\text{VaR}_{95\%} = -\text{Percentile}_5(r_p)")
-st.markdown(f"""
+st.markdown(rf"""
 Estimates the maximum expected loss over one day with 95% confidence.
 
 Where \( r_p \) are daily portfolio returns.
@@ -167,13 +162,12 @@ Your 1-day VaR is **{abs(var_95):.2%}**, meaning that in 95% of cases, losses sh
 ---
 """)
 
-# Sharpe Ratio formula and explanation
 st.markdown("### Sharpe Ratio")
 st.latex(r"S = \frac{E[R_p - R_f]}{\sigma_p} \times \sqrt{252}")
-st.markdown(f"""
+st.markdown(rf"""
 Measures the portfolio's risk-adjusted return.
 
-Where:
+Where:  
 - \( R_p \): Portfolio return  
 - \( R_f \): Risk-free return  
 - \( \sigma_p \): Volatility of portfolio returns
@@ -181,7 +175,6 @@ Where:
 Your Sharpe ratio is **{sharpe_ratio:.2f}**, while the S&P 500’s Sharpe ratio is **{benchmark_sharpe:.2f}**.  
 A higher Sharpe ratio indicates better risk-adjusted performance.
 """)
-
 
 # --- RETURN DISTRIBUTION ---
 st.subheader("4. Portfolio Return Distribution")
@@ -197,10 +190,10 @@ This histogram shows how often different daily returns occurred in your portfoli
 
 ---
 
-### Interpretation:
+### Interpretation:  
 - **Symmetry** indicates normal return behavior  
 - **Skew** shows whether large gains or losses dominate  
-- **Fat tails** suggest potential for extreme outcomes
+- **Fat tails** suggest potential for extreme outcomes  
 
 Understanding return distributions helps assess downside risk and tail events.
 """)
@@ -230,13 +223,13 @@ $$
 V_t = V_0 \times \prod_{{i=1}}^t (1 + r_i)
 $$
 
-Where:
+Where:  
 - \( V_0 \): Initial value (normalized to 1)  
 - \( r_i \): Return on day \( i \)
 
 ---
 
-### Interpretation:
+### Interpretation:  
 - Your portfolio grew by **{total_return:.2%}** over the past year  
 - The S&P 500 grew by **{benchmark_return:.2%}** over the same period
 
