@@ -71,6 +71,7 @@ $$ r_t = \frac{P_t - P_{t-1}}{P_{t-1}} $$
 where:
 - \( P_t \): Price on day \( t \)  
 - \( r_t \): Daily return  
+
 This data forms the basis for all portfolio risk and performance calculations.
 """)
 
@@ -90,12 +91,12 @@ $$
 $$
 
 Where:
-- \( \text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)
+- \( \text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)  
 - \( \sigma_i \), \( \sigma_j \): Standard deviations of the respective returns
 
 **Interpretation**:
-- \( \rho = 1 \): Perfect positive correlation
-- \( \rho = -1 \): Perfect negative correlation
+- \( \rho = 1 \): Perfect positive correlation  
+- \( \rho = -1 \): Perfect negative correlation  
 - \( \rho = 0 \): No linear relationship
 
 Lower or negative correlations between assets improve diversification and reduce portfolio risk.
@@ -152,9 +153,7 @@ Where:
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
 
 ---
-""")
 
-st.markdown(rf"""
 ### Value at Risk (VaR) at 95% Confidence  
 Estimates the maximum expected loss over one day with 95% confidence:
 
@@ -167,9 +166,7 @@ Where \( r_p \) are daily portfolio returns.
 Your 1-day VaR is **{abs(var_95):.2%}**. This means that in 95% of cases, losses should not exceed this value.
 
 ---
-""")
 
-st.markdown(rf"""
 ### Sharpe Ratio  
 Measures the portfolio's risk-adjusted return:
 
@@ -207,7 +204,6 @@ This histogram shows how often different daily returns occurred in your portfoli
 
 Understanding return distributions helps assess downside risk and tail events.
 """)
-
 
 # --- CUMULATIVE RETURNS ---
 st.subheader("5. Cumulative Returns")
