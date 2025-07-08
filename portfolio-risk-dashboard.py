@@ -19,38 +19,43 @@ tickers = [
 end_date = datetime.today()
 start_date = end_date - timedelta(days=365)
 
-# Fetch live market data summary for tickers
+# Download adjusted close prices
 @st.cache_data
-def load_market_info(tickers):
-    info_list = []
-    for ticker in tickers:
-        try:
-            tk = yf.Ticker(ticker)
-            info = tk.info
-            info_list.append({
-                "Ticker": ticker,
-                "Name": info.get("shortName", ""),
-                "Price": info.get("regularMarketPrice", np.nan),
-                "Market Cap": info.get("marketCap", np.nan),
-            })
-        except Exception as e:
-            info_list.append({
-                "Ticker": ticker,
-                "Name": "",
-                "Price": np.nan,
-                "Market Cap": np.nan,
-            })
-    df_info = pd.DataFrame(info_list)
-    df_info = df_info.dropna(subset=["Market Cap"]).sort_values(by="Market Cap", ascending=False).reset_index(drop=True)
-    return df_info
+def load_prices(tickers, start_date, end_date):
+    data = yf.download(tickers, start=start_date, end=end_date, progress=False, auto_adjust=True)
+    if isinstance(data.columns, pd.MultiIndex):
+        prices = data['Close']  # 'Close' is adjusted when auto_adjust=True
+    else:
+        prices = data.to_frame()
+        prices.columns = [tickers[0]]
+    return prices.dropna()
 
-market_info_df = load_market_info(tickers)
+prices = load_prices(tickers, start_date, end_date)
+returns = prices.pct_change().dropna()
 
-st.subheader("Current Market Data for Top 20 S&P 500 Stocks")
-st.dataframe(market_info_df.style.format({
-    "Price": "${:,.2f}",
-    "Market Cap": "${:,.0f}"
-}))
+st.markdown("""
+This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
+It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
+
+### How to use:
+1. View the default **S&P 500 Top 20 Stocks** dataset (1 year of daily returns).
+2. Adjust the **asset weights** in the sidebar (coming soon).
+3. Explore metrics, return distribution, and cumulative performance.
+4. (Optional) Upload your own dataset using the sidebar.
+
+💡 **Expected format**: CSV with numeric daily returns, one asset per column.
+""")
+
+st.sidebar.header("Upload Returns Data")
+uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
+
+if uploaded_file:
+    df = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
+    df = df.dropna()
+    st.sidebar.success("✅ Custom dataset loaded")
+else:
+    df = returns.copy()
+    st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
 
 # Show preview of data
 st.subheader("1. Preview of Return Data")
@@ -67,7 +72,7 @@ st.download_button(
     file_name="portfolio_return_data.csv",
     mime="text/csv",
 )
-
+st.dataframe(df.head())
 st.markdown(
     """
     This table shows the first few rows of your dataset.  
