@@ -141,7 +141,7 @@ st.markdown(rf"""
 Measures the total risk of the portfolio, calculated as:
 
 $$
-\sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
+\sigma_p = \sqrt{ \mathbf{w}^T \mathbf{\Sigma} \mathbf{w} }
 $$
 
 Where:
@@ -152,7 +152,9 @@ Where:
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
 
 ---
+""")
 
+st.markdown(rf"""
 ### Value at Risk (VaR) at 95% Confidence  
 Estimates the maximum expected loss over one day with 95% confidence:
 
@@ -165,7 +167,9 @@ Where \( r_p \) are daily portfolio returns.
 Your 1-day VaR is **{abs(var_95):.2%}**. This means that in 95% of cases, losses should not exceed this value.
 
 ---
+""")
 
+st.markdown(rf"""
 ### Sharpe Ratio  
 Measures the portfolio's risk-adjusted return:
 
@@ -203,6 +207,7 @@ This histogram shows how often different daily returns occurred in your portfoli
 
 Understanding return distributions helps assess downside risk and tail events.
 """)
+
 
 # --- CUMULATIVE RETURNS ---
 st.subheader("5. Cumulative Returns")
