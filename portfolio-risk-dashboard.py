@@ -82,25 +82,27 @@ corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
 
+st.subheader("2. Correlation Matrix")
+
+# Show correlation formula with st.latex
+st.markdown("The correlation matrix indicates how asset returns move together.")
+st.markdown("It is calculated using the Pearson correlation coefficient:")
+
+st.latex(r"\rho_{i,j} = \frac{\text{Cov}(r_i, r_j)}{\sigma_i \sigma_j}")
+
 st.markdown(r"""
-The **correlation matrix** indicates how asset returns move together.  
-It is calculated using the **Pearson correlation coefficient**:
+Where:  
+- \( \text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)  
+- \( \sigma_i \), \( \sigma_j \) are the standard deviations of the respective returns  
 
-$$
-\rho_{i,j} = \frac{\text{Cov}(r_i, r_j)}{\sigma_i \sigma_j}
-$$
-
-Where:
-\text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)  
-- \( \sigma_i \), \( \sigma_j \): Standard deviations of the respective returns
-
-**Interpretation**:
+**Interpretation:**  
 - \( \rho = 1 \): Perfect positive correlation  
 - \( \rho = -1 \): Perfect negative correlation  
-- \( \rho = 0 \): No linear relationship
+- \( \rho = 0 \): No linear relationship  
 
 Lower or negative correlations between assets improve diversification and reduce portfolio risk.
 """)
+
 
 # --- PORTFOLIO METRICS ---
 st.subheader("3. Portfolio Metrics")
