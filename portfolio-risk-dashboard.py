@@ -33,6 +33,30 @@ def load_prices(tickers, start_date, end_date):
 prices = load_prices(tickers, start_date, end_date)
 returns = prices.pct_change().dropna()
 
+st.markdown("""
+This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
+It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
+
+### How to use:
+1. View the default **S&P 500 Top 20 Stocks** dataset (1 year of daily returns).
+2. Adjust the **asset weights** in the sidebar (coming soon).
+3. Explore metrics, return distribution, and cumulative performance.
+4. (Optional) Upload your own dataset using the sidebar.
+
+💡 **Expected format**: CSV with numeric daily returns, one asset per column.
+""")
+
+st.sidebar.header("Upload Returns Data")
+uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
+
+if uploaded_file:
+    df = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
+    df = df.dropna()
+    st.sidebar.success("✅ Custom dataset loaded")
+else:
+    df = returns.copy()
+    st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
+
 # Fetch live market data summary for tickers
 @st.cache_data
 def load_market_info(tickers):
@@ -65,40 +89,6 @@ st.dataframe(market_info_df.style.format({
     "Price": "${:,.2f}",
     "Market Cap": "${:,.0f}"
 }))
-
-st.markdown("""
-This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
-It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
-
-### How to use:
-1. View the default **S&P 500 Top 20 Stocks** dataset (1 year of daily returns).
-2. Adjust the **asset weights** in the sidebar (coming soon).
-3. Explore metrics, return distribution, and cumulative performance.
-4. (Optional) Upload your own dataset using the sidebar.
-
-💡 **Expected format**: CSV with numeric daily returns, one asset per column.
-""")
-
-st.sidebar.header("Upload Returns Data")
-uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
-
-if uploaded_file:
-    df = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
-    df = df.dropna()
-    st.sidebar.success("✅ Custom dataset loaded")
-else:
-    df = returns.copy()
-    st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
-
-# Now load market info and show table
-market_info_df = load_market_info(tickers)
-
-st.subheader("Current Market Data for Top 20 S&P 500 Stocks")
-st.dataframe(market_info_df.style.format({
-    "Price": "${:,.2f}",
-    "Market Cap": "${:,.0f}"
-}))
-
 # Then show the raw returns preview
 st.subheader("1. Preview of Return Data")
 st.dataframe(df.head())
