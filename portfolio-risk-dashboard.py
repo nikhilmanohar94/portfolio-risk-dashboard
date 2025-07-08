@@ -27,8 +27,15 @@ top_20_tickers = [
 # Fetch historical stock prices
 @st.cache_data
 def load_data(tickers, start_date, end_date):
-    data = yf.download(tickers, start=start_date, end=end_date)["Adj Close"]
-    return data
+    data = yf.download(tickers, start=start_date, end=end_date, group_by='ticker', auto_adjust=True)
+
+    # Extract adjusted close prices (use "Close" with auto_adjust=True)
+    if isinstance(data.columns, pd.MultiIndex):
+        adj_close = data["Close"]
+    else:
+        adj_close = data.to_frame(name=tickers[0])
+
+    return adj_close
 
 # Date range: past 1 year
 end_date = datetime.today()
