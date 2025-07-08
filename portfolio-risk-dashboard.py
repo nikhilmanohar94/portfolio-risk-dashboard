@@ -4,7 +4,7 @@ import numpy as np
 import plotly.express as px
 
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
-st.title("📊 Portfolio Risk Dashboard")
+st.title("Portfolio Risk Dashboard")
 
 # Create synthetic sample data if no upload
 def generate_sample_data(num_assets=20, num_days=252*2):  # 2 years daily returns approx
@@ -25,7 +25,7 @@ st.markdown("""
 This interactive app calculates key portfolio risk metrics based on uploaded or sample asset return data.  
 It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
 
-### 🧭 How to use:
+### How to use:
 1. View the default **sample dataset** (daily returns of 20 assets).
 2. Adjust the **asset weights** in the sidebar (comma-separated).
 3. Explore metrics, return distribution, and cumulative performance.
