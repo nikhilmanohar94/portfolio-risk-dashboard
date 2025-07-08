@@ -28,9 +28,9 @@ def get_market_caps(tickers):
             info = data.tickers[ticker].info
             info_list.append({
                 "Ticker": ticker,
-                "Market Cap": info.get("marketCap", np.nan),
                 "Name": info.get("shortName", ""),
                 "Price": info.get("regularMarketPrice", np.nan),
+                "Market Cap": info.get("marketCap", np.nan),
             })
     df_info = pd.DataFrame(info_list)
     df_info = df_info.dropna(subset=["Market Cap"])
