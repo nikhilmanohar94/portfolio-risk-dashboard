@@ -9,7 +9,7 @@ import io
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("📊 Portfolio Risk Dashboard")
 
-st.markdown("""
+st.markdown(r"""
 This interactive dashboard calculates key portfolio risk metrics and compares your portfolio to the S&P 500 benchmark.  
 
 ### How to Use:
@@ -143,8 +143,6 @@ Measures the total risk of the portfolio, calculated as:
 $$
 \sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
 $$
-...
-
 
 Where:
 - \( \mathbf{w} \): Vector of asset weights  
@@ -193,18 +191,17 @@ st.plotly_chart(fig2, use_container_width=True)
 st.markdown(rf"""
 This histogram shows how often different daily returns occurred in your portfolio.
 
-- The **center** reflects your average daily return: **{port_returns.mean():.4%}**
+- The **center** reflects your average daily return: **{port_returns.mean():.4%}**  
 - The **spread** (standard deviation) is **{port_returns.std():.4%}**, compared to **{benchmark_returns.std():.4%}** for the S&P 500
 
 ---
 
 ### Interpretation:
-- **Symmetry** indicates normal return behavior
-- **Skew** shows whether large gains or losses dominate
+- **Symmetry** indicates normal return behavior  
+- **Skew** shows whether large gains or losses dominate  
 - **Fat tails** suggest potential for extreme outcomes
 
 Understanding return distributions helps assess downside risk and tail events.
-
 """)
 
 # --- CUMULATIVE RETURNS ---
@@ -224,12 +221,12 @@ total_return = cum_port.iloc[-1] - 1
 benchmark_return = cum_bench.iloc[-1] - 1
 
 st.markdown(rf"""
-This chart shows how an investment of $1 would have grown over the past year.
+This chart shows how an investment of \$1 would have grown over the past year.
 
 Cumulative return is calculated as:
 
 $$
-V_t = V_0 \times \prod_{i=1}^{t}(1 + r_i)
+V_t = V_0 \times \prod_{{i=1}}^t (1 + r_i)
 $$
 
 Where:
@@ -239,7 +236,7 @@ Where:
 ---
 
 ### Interpretation:
-- Your portfolio grew by **{total_return:.2%}** over the past year
+- Your portfolio grew by **{total_return:.2%}** over the past year  
 - The S&P 500 grew by **{benchmark_return:.2%}** over the same period
 
 This provides a direct benchmark comparison of total performance.
