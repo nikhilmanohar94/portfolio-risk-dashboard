@@ -71,19 +71,13 @@ r_t = \frac{P_t - P_{t-1}}{P_{t-1}}
 $$
 
 where:  
-- \( P_t \): Price on day \( t \)  
-- \( r_t \): Daily return  
+- $P_t$: Price on day $t$  
+- $r_t$: Daily return  
 
 This data forms the basis for all portfolio risk and performance calculations.
 """)
 
 # --- CORRELATION ---
-st.subheader("2. Correlation Matrix")
-numeric_df = df.select_dtypes(include=np.number)
-corr = numeric_df.corr()
-fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
-st.plotly_chart(fig1, use_container_width=True)
-
 st.markdown("The correlation matrix indicates how asset returns move together.")
 st.markdown("It is calculated using the Pearson correlation coefficient:")
 
@@ -103,49 +97,15 @@ Lower or negative correlations between assets improve diversification and reduce
 """)
 
 # --- PORTFOLIO METRICS ---
-st.subheader("3. Portfolio Metrics")
-
-default_weights = ", ".join(["0.05"] * numeric_df.shape[1])
-weights_input = st.sidebar.text_input("Asset Weights (comma-separated)", value=default_weights)
-
-try:
-    weights = np.array([float(w.strip()) for w in weights_input.split(",")])
-except ValueError:
-    st.error("Please enter valid numeric weights.")
-    st.stop()
-
-if len(weights) != numeric_df.shape[1]:
-    st.error("Number of weights must match number of assets.")
-    st.stop()
-
-weights = weights / np.sum(weights)
-
-cov_matrix = numeric_df.cov() * 252  # Annualize covariance matrix
-port_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
-
-port_returns = numeric_df.dot(weights)
-rf_daily = 0.02 / 252
-excess_returns = port_returns - rf_daily
-sharpe_ratio = (excess_returns.mean() / excess_returns.std()) * np.sqrt(252)
-var_95 = np.percentile(port_returns, 5)
-
-benchmark_vol = benchmark_returns.std() * np.sqrt(252)
-benchmark_sharpe = ((benchmark_returns.mean() - rf_daily) / benchmark_returns.std()) * np.sqrt(252)
-
-col1, col2, col3 = st.columns(3)
-col1.metric("📉 Annualized Volatility", f"{port_vol:.2%}")
-col2.metric("⚠️ 1-Day VaR (95%)", f"{abs(var_95):.2%}")
-col3.metric("📈 Sharpe Ratio", f"{sharpe_ratio:.2f}")
-
 st.markdown("### Annualized Volatility")
 st.latex(r"\sigma_p = \sqrt{\mathbf{w}^T \mathbf{\Sigma} \mathbf{w}}")
 st.markdown(rf"""
 Measures the total risk of the portfolio, calculated as above.
 
 Where:  
-- \( \mathbf{{w}} \): Vector of asset weights  
-- \( \mathbf{{\Sigma}} \): Covariance matrix of returns  
-- \( \sigma_p \): Annualized portfolio volatility
+- $\mathbf{{w}}$: Vector of asset weights  
+- $\mathbf{{\Sigma}}$: Covariance matrix of returns  
+- $\sigma_p$: Annualized portfolio volatility
 
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
 ---
@@ -156,7 +116,7 @@ st.latex(r"\text{VaR}_{95\%} = -\text{Percentile}_5(r_p)")
 st.markdown(rf"""
 Estimates the maximum expected loss over one day with 95% confidence.
 
-Where \( r_p \) are daily portfolio returns.
+Where $r_p$ are daily portfolio returns.
 
 Your 1-day VaR is **{abs(var_95):.2%}**, meaning that in 95% of cases, losses should not exceed this value.
 ---
@@ -168,20 +128,15 @@ st.markdown(rf"""
 Measures the portfolio's risk-adjusted return.
 
 Where:  
-- \( R_p \): Portfolio return  
-- \( R_f \): Risk-free return  
-- \( \sigma_p \): Volatility of portfolio returns
+- $R_p$: Portfolio return  
+- $R_f$: Risk-free return  
+- $\sigma_p$: Volatility of portfolio returns
 
 Your Sharpe ratio is **{sharpe_ratio:.2f}**, while the S&P 500’s Sharpe ratio is **{benchmark_sharpe:.2f}**.  
 A higher Sharpe ratio indicates better risk-adjusted performance.
 """)
 
 # --- RETURN DISTRIBUTION ---
-st.subheader("4. Portfolio Return Distribution")
-
-fig2 = px.histogram(port_returns, nbins=50, title="Daily Return Distribution")
-st.plotly_chart(fig2, use_container_width=True)
-
 st.markdown(rf"""
 This histogram shows how often different daily returns occurred in your portfolio.
 
@@ -199,21 +154,6 @@ Understanding return distributions helps assess downside risk and tail events.
 """)
 
 # --- CUMULATIVE RETURNS ---
-st.subheader("5. Cumulative Returns")
-
-cum_port = (1 + port_returns).cumprod()
-cum_bench = (1 + benchmark_returns).cumprod()
-cum_df = pd.DataFrame({
-    "Portfolio": cum_port,
-    "S&P 500": cum_bench
-})
-
-fig3 = px.line(cum_df, title="Cumulative Return Comparison")
-st.plotly_chart(fig3, use_container_width=True)
-
-total_return = cum_port.iloc[-1] - 1
-benchmark_return = cum_bench.iloc[-1] - 1
-
 st.markdown(rf"""
 This chart shows how an investment of \$1 would have grown over the past year.
 
@@ -224,8 +164,8 @@ V_t = V_0 \times \prod_{{i=1}}^t (1 + r_i)
 $$
 
 Where:  
-- \( V_0 \): Initial value (normalized to 1)  
-- \( r_i \): Return on day \( i \)
+- $V_0$: Initial value (normalized to 1)  
+- $r_i$: Return on day $i$
 
 ---
 
