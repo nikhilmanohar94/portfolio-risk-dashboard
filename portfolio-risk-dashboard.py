@@ -137,42 +137,40 @@ col1.metric("📉 Annualized Volatility", f"{port_vol:.2%}")
 col2.metric("⚠️ 1-Day VaR (95%)", f"{abs(var_95):.2%}")
 col3.metric("📈 Sharpe Ratio", f"{sharpe_ratio:.2f}")
 
-st.markdown(rf"""
-### Annualized Volatility  
-Measures the total risk of the portfolio, calculated as:
+st.subheader("3. Portfolio Metrics")
 
-$$
-\sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
-$$
+# Show Annualized Volatility formula
+st.markdown("### Annualized Volatility")
+st.latex(r"\sigma_p = \sqrt{\mathbf{w}^T \mathbf{\Sigma} \mathbf{w}}")
+st.markdown(f"""
+Measures the total risk of the portfolio, calculated as above.
 
 Where:
-- \( \mathbf{{w}} \): Vector of asset weights  
-- \( \mathbf{{\Sigma}} \): Covariance matrix of returns  
-- \( \sigma_p \): Annualized portfolio volatility
+- \( \\mathbf{{w}} \): Vector of asset weights  
+- \( \\mathbf{{\Sigma}} \): Covariance matrix of returns  
+- \( \\sigma_p \): Annualized portfolio volatility
 
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
-
 ---
+""")
 
-### Value at Risk (VaR) at 95% Confidence  
-Estimates the maximum expected loss over one day with 95% confidence:
-
-$$
-\text{{VaR}}_{{95\%}} = -\text{{Percentile}}_5(r_p)
-$$
+# VaR formula and explanation
+st.markdown("### Value at Risk (VaR) at 95% Confidence")
+st.latex(r"\text{VaR}_{95\%} = -\text{Percentile}_5(r_p)")
+st.markdown(f"""
+Estimates the maximum expected loss over one day with 95% confidence.
 
 Where \( r_p \) are daily portfolio returns.
 
-Your 1-day VaR is **{abs(var_95):.2%}**. This means that in 95% of cases, losses should not exceed this value.
-
+Your 1-day VaR is **{abs(var_95):.2%}**, meaning that in 95% of cases, losses should not exceed this value.
 ---
+""")
 
-### Sharpe Ratio  
-Measures the portfolio's risk-adjusted return:
-
-$$
-S = \frac{{E[R_p - R_f]}}{{\sigma_p}} \times \sqrt{{252}}
-$$
+# Sharpe Ratio formula and explanation
+st.markdown("### Sharpe Ratio")
+st.latex(r"S = \frac{E[R_p - R_f]}{\sigma_p} \times \sqrt{252}")
+st.markdown(f"""
+Measures the portfolio's risk-adjusted return.
 
 Where:
 - \( R_p \): Portfolio return  
