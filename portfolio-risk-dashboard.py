@@ -59,6 +59,19 @@ else:
 # Show preview of data
 st.subheader("1. Preview of Return Data")
 st.dataframe(df.head())
+
+# Prepare CSV bytes for download
+csv_buffer = io.StringIO()
+df.to_csv(csv_buffer)
+csv_data = csv_buffer.getvalue()
+
+st.download_button(
+    label="📥 Download Raw Return Data as CSV",
+    data=csv_data,
+    file_name="portfolio_return_data.csv",
+    mime="text/csv",
+)
+st.dataframe(df.head())
 st.markdown(
     """
     This table shows the first few rows of your dataset.  
