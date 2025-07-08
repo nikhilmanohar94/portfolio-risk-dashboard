@@ -128,7 +128,7 @@ corr_pairs['Asset 2'] = corr_pairs['Asset 2'].map(ticker_to_name)
 top_abs_corrs = corr_pairs.reindex(corr_pairs['Correlation'].abs().sort_values(ascending=False).index
 
 # Display top 20
-st.dataframe(sorted_corrs.head(20).style.format({"Correlation": "{:.2f}"}))
+st.dataframe(top_abs_corrs.head(20).style.format({"Correlation": "{:.2f}"}))
 
 st.markdown("The correlation matrix indicates how asset returns move together.")
 st.markdown("It is calculated using the Pearson correlation coefficient:")
