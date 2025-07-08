@@ -142,12 +142,12 @@ st.markdown(rf"""
 Measures the total risk of the portfolio, calculated as:
 
 $$
-\sigma_p = \sqrt{ \mathbf{w}^T \mathbf{\Sigma} \mathbf{w} }
+\sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
 $$
 
 Where:
-- \( \mathbf{w} \): Vector of asset weights  
-- \( \mathbf{\Sigma} \): Covariance matrix of returns  
+- \( \mathbf{{w}} \): Vector of asset weights  
+- \( \mathbf{{\Sigma}} \): Covariance matrix of returns  
 - \( \sigma_p \): Annualized portfolio volatility
 
 Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&P 500's **{benchmark_vol:.2%}**.
@@ -158,7 +158,7 @@ Your portfolio's annualized volatility is **{port_vol:.2%}**, compared to the S&
 Estimates the maximum expected loss over one day with 95% confidence:
 
 $$
-\text{VaR}_{95\%} = -\text{Percentile}_5(r_p)
+\text{{VaR}}_{{95\%}} = -\text{{Percentile}}_5(r_p)
 $$
 
 Where \( r_p \) are daily portfolio returns.
@@ -171,7 +171,7 @@ Your 1-day VaR is **{abs(var_95):.2%}**. This means that in 95% of cases, losses
 Measures the portfolio's risk-adjusted return:
 
 $$
-S = \frac{E[R_p - R_f]}{\sigma_p} \times \sqrt{252}
+S = \frac{{E[R_p - R_f]}}{{\sigma_p}} \times \sqrt{{252}}
 $$
 
 Where:
@@ -182,6 +182,7 @@ Where:
 Your Sharpe ratio is **{sharpe_ratio:.2f}**, while the S&P 500’s Sharpe ratio is **{benchmark_sharpe:.2f}**.  
 A higher Sharpe ratio indicates better risk-adjusted performance.
 """)
+
 
 # --- RETURN DISTRIBUTION ---
 st.subheader("4. Portfolio Return Distribution")
