@@ -9,11 +9,26 @@ import io
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
 
+st.markdown("""
+Welcome to the **Portfolio Risk Dashboard** 📊
+
+This application helps you analyze the risk and performance of a portfolio of stocks using daily return data. It provides statistical insights, visualizations, and downloadable outputs.
+
+**How to Use:**
+1. **Default:** By default, the app analyzes the top 20 S&P 500 companies by market cap.
+2. **Optional Upload:** Use the sidebar to upload your own returns CSV (daily returns; each column = asset).
+3. **Customize Weights:** Set your asset weights in the sidebar for portfolio-level analysis.
+4. **Explore:** Review return data, correlations, key risk metrics (Volatility, VaR, Sharpe), distribution, and cumulative return.
+
+---
+""")
+
 @st.cache_data(show_spinner=True)
 def get_sp500_tickers():
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
     table = pd.read_html(url, header=0)[0]
     tickers = table['Symbol'].tolist()
+    tickers = [t for t in tickers if t.upper() != "GOOG"]  # remove 'GOOG'
     return tickers, table
 
 @st.cache_data(show_spinner=True)
