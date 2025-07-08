@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import yfinance as yf
 from datetime import datetime, timedelta
+import io
 
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
