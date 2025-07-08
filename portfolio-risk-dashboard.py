@@ -30,6 +30,29 @@ benchmark_ticker = "^GSPC"
 end_date = datetime.today()
 start_date = end_date - timedelta(days=365)
 
+ticker_to_name = {
+    "NVDA": "NVIDIA",
+    "MSFT": "Microsoft",
+    "AAPL": "Apple",
+    "AMZN": "Amazon",
+    "GOOGL": "Alphabet",
+    "META": "Meta Platforms",
+    "AVGO": "Broadcom",
+    "TSLA": "Tesla",
+    "JPM": "JPMorgan Chase",
+    "WMT": "Walmart",
+    "V": "Visa",
+    "LLY": "Eli Lilly",
+    "ORCL": "Oracle",
+    "NFLX": "Netflix",
+    "MA": "Mastercard",
+    "XOM": "ExxonMobil",
+    "COST": "Costco",
+    "PG": "Procter & Gamble",
+    "JNJ": "Johnson & Johnson",
+    "HD": "Home Depot"
+}
+
 # --- DATA LOADING ---
 @st.cache_data
 def load_prices(tickers, start_date, end_date):
@@ -84,21 +107,25 @@ corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
 
-# --- CORRELATION TABLE ---
-st.subheader("Top Pairwise Correlations")
+# --- CORRELATION TABLE WITH COMPANY NAMES ---
+st.subheader("Top 20 Pairwise Correlations (by Absolute Value)")
 
-# Unstack the correlation matrix and rename columns safely
+# Unstack correlation matrix to get all pairwise correlations
 corr_pairs = corr.unstack().rename_axis(['Asset 1', 'Asset 2']).reset_index(name='Correlation')
 
 # Remove self-correlations
 corr_pairs = corr_pairs[corr_pairs['Asset 1'] != corr_pairs['Asset 2']]
 
-# Drop symmetric duplicates (A-B and B-A)
+# Remove duplicate pairs
 corr_pairs['Pair'] = corr_pairs.apply(lambda row: tuple(sorted([row['Asset 1'], row['Asset 2']])), axis=1)
 corr_pairs = corr_pairs.drop_duplicates(subset='Pair').drop(columns='Pair')
 
-# Sort by correlation descending
-sorted_corrs = corr_pairs.sort_values(by="Correlation", ascending=False).reset_index(drop=True)
+# Map tickers to company names
+corr_pairs['Asset 1'] = corr_pairs['Asset 1'].map(ticker_to_name)
+corr_pairs['Asset 2'] = corr_pairs['Asset 2'].map(ticker_to_name)
+
+# Sort by absolute value of correlation
+top_abs_corrs = corr_pairs.reindex(corr_pairs['Correlation'].abs().sort_values(ascending=False).index
 
 # Display top 20
 st.dataframe(sorted_corrs.head(20).style.format({"Correlation": "{:.2f}"}))
