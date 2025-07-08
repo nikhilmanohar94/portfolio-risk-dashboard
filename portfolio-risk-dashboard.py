@@ -91,7 +91,7 @@ $$
 $$
 
 Where:
-- \( \text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)  
+\text{Cov}(r_i, r_j) \) is the covariance between returns \( r_i \) and \( r_j \)  
 - \( \sigma_i \), \( \sigma_j \): Standard deviations of the respective returns
 
 **Interpretation**:
