@@ -144,7 +144,7 @@ $$
 \sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
 $$
 ...
-""")
+
 
 Where:
 - \( \mathbf{w} \): Vector of asset weights  
