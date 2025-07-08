@@ -34,18 +34,19 @@ def get_sp500_tickers():
 @st.cache_data(show_spinner=True)
 def get_market_caps(tickers):
     info_list = []
-    for ticker in tickers:
-        try:
-            tk = yf.Ticker(ticker)
-            info = tk.fast_info
+    batch_size = 50
+    for i in range(0, len(tickers), batch_size):
+        batch = tickers[i:i+batch_size]
+        tickers_str = " ".join(batch)
+        data = yf.Tickers(tickers_str)
+        for ticker in batch:
+            info = data.tickers[ticker].info
             info_list.append({
                 "Ticker": ticker,
-                "Price": info.get("last_price", np.nan),
-                "Market Cap": info.get("market_cap", np.nan),
-                "Name": ""  # fast_info doesn't return names
+                "Name": info.get("shortName", ""),
+                "Price": info.get("regularMarketPrice", np.nan),
+                "Market Cap": info.get("marketCap", np.nan),
             })
-        except Exception:
-            continue
     df_info = pd.DataFrame(info_list)
     df_info = df_info.dropna(subset=["Market Cap"])
     return df_info
