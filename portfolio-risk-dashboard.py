@@ -72,7 +72,7 @@ st.download_button(
     file_name="portfolio_return_data.csv",
     mime="text/csv",
 )
-st.dataframe(df.head())
+
 st.markdown(
     """
     This table shows the first few rows of your dataset.  
