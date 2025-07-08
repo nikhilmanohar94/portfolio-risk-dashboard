@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import yfinance as yf
 
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
@@ -20,6 +21,28 @@ def generate_sample_data(num_assets=20, num_days=252*2):  # 2 years daily return
     
     columns = [f"Stock_{i+1}" for i in range(num_assets)]
     return pd.DataFrame(returns, columns=columns)
+
+# Define tickers (Top 20 by market cap — approx. as of 2025)
+tickers = [
+    "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "BRK-B", "LLY", "AVGO", "TSLA",
+    "UNH", "JPM", "V", "XOM", "MA", "JNJ", "PG", "HD", "COST", "MRK"
+]
+
+# Define date range
+end_date = datetime.today()
+start_date = end_date - timedelta(days=365)
+
+# Download adjusted close prices
+data = yf.download(tickers, start=start_date, end=end_date, progress=False, auto_adjust=True)
+
+# Extract adjusted close prices (handles both single and multi-index case)
+if isinstance(data.columns, pd.MultiIndex):
+    prices = data['Close']  # or 'Adj Close' if available — with auto_adjust=True 'Close' is adjusted
+else:
+    prices = data.to_frame()
+
+# Clean and drop missing rows
+prices = prices.dropna()
 
 st.markdown("""
 This interactive app calculates key portfolio risk metrics based on uploaded or sample asset return data.  
@@ -45,7 +68,7 @@ else:
     st.sidebar.info("Using synthetic sample dataset with 20 stocks")
 
 df.dropna(inplace=True)
-numeric_df = df.select_dtypes(include=np.number)
+numeric_df = prices.select_dtypes(include=np.number)
 
 st.subheader("1. Preview of Data")
 st.dataframe(df.head())
