@@ -72,6 +72,7 @@ st.markdown(
 )
 
 st.subheader("2. Correlation Matrix")
+numeric_df = df.select_dtypes(include=np.number)
 corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
