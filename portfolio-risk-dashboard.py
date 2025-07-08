@@ -141,8 +141,10 @@ st.markdown(rf"""
 Measures the total risk of the portfolio, calculated as:
 
 $$
-\sigma_p = \sqrt{ \mathbf{w}^T \mathbf{\Sigma} \mathbf{w} }
+\sigma_p = \sqrt{{ \mathbf{{w}}^T \mathbf{{\Sigma}} \mathbf{{w}} }}
 $$
+...
+""")
 
 Where:
 - \( \mathbf{w} \): Vector of asset weights  
