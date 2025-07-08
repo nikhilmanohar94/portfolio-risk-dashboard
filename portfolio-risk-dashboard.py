@@ -9,42 +9,68 @@ import io
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
 
-# Define tickers (Top 20 by market cap — approx. as of 2025)
-tickers = [
-    "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "BRK-B", "LLY", "AVGO", "TSLA",
-    "UNH", "JPM", "V", "XOM", "MA", "JNJ", "PG", "HD", "COST", "MRK"
-]
+@st.cache_data(show_spinner=True)
+def get_sp500_tickers():
+    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    table = pd.read_html(url, header=0)[0]
+    tickers = table['Symbol'].tolist()
+    return tickers, table
+
+@st.cache_data(show_spinner=True)
+def get_market_caps(tickers):
+    # Fetch info for all tickers in batches to avoid rate limits
+    info_list = []
+    batch_size = 50
+    for i in range(0, len(tickers), batch_size):
+        batch = tickers[i:i+batch_size]
+        tickers_str = " ".join(batch)
+        data = yf.Tickers(tickers_str)
+        for ticker in batch:
+            info = data.tickers[ticker].info
+            info_list.append({
+                "Ticker": ticker,
+                "Market Cap": info.get("marketCap", np.nan),
+                "Name": info.get("shortName", ""),
+                "Price": info.get("regularMarketPrice", np.nan),
+            })
+    df_info = pd.DataFrame(info_list)
+    df_info = df_info.dropna(subset=["Market Cap"])
+    return df_info
+
+# Get full S&P 500 list and tickers
+all_tickers, sp500_table = get_sp500_tickers()
+
+# Get market caps and other info
+market_info_df = get_market_caps(all_tickers)
+
+# Select top 20 by market cap
+top_20_info = market_info_df.sort_values("Market Cap", ascending=False).head(20)
+top_20_tickers = top_20_info["Ticker"].tolist()
+
+st.subheader("Current Market Data for Top 20 S&P 500 Stocks")
+st.dataframe(
+    top_20_info.reset_index(drop=True).style.format({
+        "Price": "${:,.2f}",
+        "Market Cap": "${:,.0f}"
+    })
+)
 
 # Define date range
 end_date = datetime.today()
 start_date = end_date - timedelta(days=365)
 
-# Download adjusted close prices
 @st.cache_data
 def load_prices(tickers, start_date, end_date):
     data = yf.download(tickers, start=start_date, end=end_date, progress=False, auto_adjust=True)
     if isinstance(data.columns, pd.MultiIndex):
-        prices = data['Close']  # 'Close' is adjusted when auto_adjust=True
+        prices = data['Close']
     else:
         prices = data.to_frame()
         prices.columns = [tickers[0]]
     return prices.dropna()
 
-prices = load_prices(tickers, start_date, end_date)
+prices = load_prices(top_20_tickers, start_date, end_date)
 returns = prices.pct_change().dropna()
-
-st.markdown("""
-This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
-It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
-
-### How to use:
-1. View the default **S&P 500 Top 20 Stocks** dataset (1 year of daily returns).
-2. Adjust the **asset weights** in the sidebar (coming soon).
-3. Explore metrics, return distribution, and cumulative performance.
-4. (Optional) Upload your own dataset using the sidebar.
-
-💡 **Expected format**: CSV with numeric daily returns, one asset per column.
-""")
 
 st.sidebar.header("Upload Returns Data")
 uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
@@ -56,6 +82,11 @@ if uploaded_file:
 else:
     df = returns.copy()
     st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
+
+# Then continue with the rest of your app (show data preview, correlation matrix, metrics, etc.)
+# ...
+
+
 
 # Fetch live market data summary for tickers
 @st.cache_data
