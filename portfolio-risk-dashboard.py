@@ -110,25 +110,29 @@ st.plotly_chart(fig1, use_container_width=True)
 # --- CORRELATION TABLE WITH COMPANY NAMES ---
 st.subheader("Top 20 Pairwise Correlations (by Absolute Value)")
 
-# Unstack correlation matrix to get all pairwise correlations
-corr_pairs = corr.unstack().rename_axis(['Asset 1', 'Asset 2']).reset_index(name='Correlation')
+# Unstack correlation matrix
+corr_pairs = corr.unstack().rename_axis(['Ticker 1', 'Ticker 2']).reset_index(name='Correlation')
 
 # Remove self-correlations
-corr_pairs = corr_pairs[corr_pairs['Asset 1'] != corr_pairs['Asset 2']]
+corr_pairs = corr_pairs[corr_pairs['Ticker 1'] != corr_pairs['Ticker 2']]
 
 # Remove duplicate pairs
-corr_pairs['Pair'] = corr_pairs.apply(lambda row: tuple(sorted([row['Asset 1'], row['Asset 2']])), axis=1)
+corr_pairs['Pair'] = corr_pairs.apply(lambda row: tuple(sorted([row['Ticker 1'], row['Ticker 2']])), axis=1)
 corr_pairs = corr_pairs.drop_duplicates(subset='Pair').drop(columns='Pair')
 
-# Map tickers to company names
-corr_pairs['Asset 1'] = corr_pairs['Asset 1'].map(ticker_to_name)
-corr_pairs['Asset 2'] = corr_pairs['Asset 2'].map(ticker_to_name)
+# Sort by absolute value
+top_abs_corrs = corr_pairs.reindex(corr_pairs['Correlation'].abs().sort_values(ascending=False).index)
 
-# Sort by absolute value of correlation
-top_abs_corrs = corr_pairs.reindex(corr_pairs['Correlation'].abs().sort_values(ascending=False).index
+# Replace tickers with names
+top_abs_corrs['Company 1'] = top_abs_corrs['Ticker 1'].map(ticker_to_name)
+top_abs_corrs['Company 2'] = top_abs_corrs['Ticker 2'].map(ticker_to_name)
 
-# Display top 20
+# Select and reorder columns
+top_abs_corrs = top_abs_corrs[['Company 1', 'Company 2', 'Correlation']]
+
+# Display
 st.dataframe(top_abs_corrs.head(20).style.format({"Correlation": "{:.2f}"}))
+
 
 st.markdown("The correlation matrix indicates how asset returns move together.")
 st.markdown("It is calculated using the Pearson correlation coefficient:")
