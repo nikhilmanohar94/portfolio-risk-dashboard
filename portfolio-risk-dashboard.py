@@ -3,24 +3,10 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import yfinance as yf
+from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
-
-# Create synthetic sample data if no upload
-def generate_sample_data(num_assets=20, num_days=252*2):  # 2 years daily returns approx
-    np.random.seed(42)
-    # Simulate daily returns ~ Normal with small mean & std dev
-    means = np.random.uniform(0.0001, 0.001, size=num_assets)
-    stds = np.random.uniform(0.01, 0.03, size=num_assets)
-    
-    returns = np.array([
-        np.random.normal(loc=means[i], scale=stds[i], size=num_days)
-        for i in range(num_assets)
-    ]).T
-    
-    columns = [f"Stock_{i+1}" for i in range(num_assets)]
-    return pd.DataFrame(returns, columns=columns)
 
 # Define tickers (Top 20 by market cap — approx. as of 2025)
 tickers = [
@@ -33,24 +19,26 @@ end_date = datetime.today()
 start_date = end_date - timedelta(days=365)
 
 # Download adjusted close prices
-data = yf.download(tickers, start=start_date, end=end_date, progress=False, auto_adjust=True)
+@st.cache_data
+def load_prices(tickers, start_date, end_date):
+    data = yf.download(tickers, start=start_date, end=end_date, progress=False, auto_adjust=True)
+    if isinstance(data.columns, pd.MultiIndex):
+        prices = data['Close']  # 'Close' is adjusted when auto_adjust=True
+    else:
+        prices = data.to_frame()
+        prices.columns = [tickers[0]]
+    return prices.dropna()
 
-# Extract adjusted close prices (handles both single and multi-index case)
-if isinstance(data.columns, pd.MultiIndex):
-    prices = data['Close']  # or 'Adj Close' if available — with auto_adjust=True 'Close' is adjusted
-else:
-    prices = data.to_frame()
-
-# Clean and drop missing rows
-prices = prices.dropna()
+prices = load_prices(tickers, start_date, end_date)
+returns = prices.pct_change().dropna()
 
 st.markdown("""
-This interactive app calculates key portfolio risk metrics based on uploaded or sample asset return data.  
+This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
 It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
 
 ### How to use:
-1. View the default **sample dataset** (daily returns of 20 assets).
-2. Adjust the **asset weights** in the sidebar (comma-separated).
+1. View the default **S&P 500 Top 20 Stocks** dataset (1 year of daily returns).
+2. Adjust the **asset weights** in the sidebar (coming soon).
 3. Explore metrics, return distribution, and cumulative performance.
 4. (Optional) Upload your own dataset using the sidebar.
 
@@ -61,16 +49,15 @@ st.sidebar.header("Upload Returns Data")
 uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+    df = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
+    df = df.dropna()
     st.sidebar.success("✅ Custom dataset loaded")
 else:
-    df = generate_sample_data()
-    st.sidebar.info("Using synthetic sample dataset with 20 stocks")
+    df = returns.copy()
+    st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
 
-df.dropna(inplace=True)
-numeric_df = prices.select_dtypes(include=np.number)
-
-st.subheader("1. Preview of Data")
+# Show preview of data
+st.subheader("1. Preview of Return Data")
 st.dataframe(df.head())
 st.markdown(
     """
