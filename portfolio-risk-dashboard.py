@@ -6,50 +6,35 @@ import yfinance as yf
 from datetime import datetime, timedelta
 import io
 
+# Page configuration
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
 st.title("Portfolio Risk Dashboard")
 
+# App description and instructions
 st.markdown("""
-Welcome to the **Portfolio Risk Dashboard** 📊
+This interactive app calculates key portfolio risk metrics based on real or uploaded asset return data.  
+It includes correlation analysis, Value at Risk (VaR), Sharpe ratio, volatility, and return visualizations.
 
-This application helps you analyze the risk and performance of a portfolio of stocks using daily return data. It provides statistical insights, visualizations, and downloadable outputs.
+### How to use:
+1. View the default **Top 20 US Stocks** dataset (1 year of daily returns).
+2. Adjust the **asset weights** in the sidebar.
+3. Explore metrics, return distribution, and cumulative performance.
+4. (Optional) Upload your own dataset using the sidebar.
 
-**How to Use:**
-1. **Default:** By default, the app analyzes the top 20 S&P 500 companies by market cap.
-2. **Optional Upload:** Use the sidebar to upload your own returns CSV (daily returns; each column = asset).
-3. **Customize Weights:** Set your asset weights in the sidebar for portfolio-level analysis.
-4. **Explore:** Review return data, correlations, key risk metrics (Volatility, VaR, Sharpe), distribution, and cumulative return.
-
----
+💡 **Expected format**: CSV with numeric daily returns, one asset per column.
 """)
 
-@st.cache_data(show_spinner=True)
-def get_sp500_tickers():
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    table = pd.read_html(url, header=0)[0]
-    tickers = table['Symbol'].tolist()
-    tickers = [t for t in tickers if t.upper() != "GOOG"]  # remove 'GOOG'
-    return tickers, table
+# Fixed list of top 20 tickers
+tickers = [
+    "NVDA", "MSFT", "AAPL", "AMZN", "GOOGL",
+    "META", "AVGO", "TSLA", "JPM", "WMT",
+    "V", "LLY", "ORCL", "NFLX", "MA",
+    "XOM", "COST", "PG", "JNJ", "HD"
+]
 
-@st.cache_data(show_spinner=True)
-def get_market_caps(tickers):
-    info_list = []
-    batch_size = 50
-    for i in range(0, len(tickers), batch_size):
-        batch = tickers[i:i+batch_size]
-        tickers_str = " ".join(batch)
-        data = yf.Tickers(tickers_str)
-        for ticker in batch:
-            info = data.tickers[ticker].info
-            info_list.append({
-                "Ticker": ticker,
-                "Name": info.get("shortName", ""),
-                "Price": info.get("regularMarketPrice", np.nan),
-                "Market Cap": info.get("marketCap", np.nan),
-            })
-    df_info = pd.DataFrame(info_list)
-    df_info = df_info.dropna(subset=["Market Cap"])
-    return df_info
+# Define date range
+end_date = datetime.today()
+start_date = end_date - timedelta(days=365)
 
 @st.cache_data
 def load_prices(tickers, start_date, end_date):
@@ -61,34 +46,11 @@ def load_prices(tickers, start_date, end_date):
         prices.columns = [tickers[0]]
     return prices.dropna()
 
-# Fetch S&P 500 tickers and full table
-all_tickers, sp500_table = get_sp500_tickers()
-
-# Get market caps and info for all tickers
-market_info_df = get_market_caps(all_tickers)
-
-# Select top 20 by market cap
-top_20_info = market_info_df.sort_values("Market Cap", ascending=False).head(20)
-top_20_tickers = top_20_info["Ticker"].tolist()
-
-# Display current market data for top 20
-st.subheader("Current Market Data for Top 20 S&P 500 Stocks")
-st.dataframe(
-    top_20_info.reset_index(drop=True).style.format({
-        "Price": "${:,.2f}",
-        "Market Cap": "${:,.0f}"
-    })
-)
-
-# Define date range for price data
-end_date = datetime.today()
-start_date = end_date - timedelta(days=365)
-
-# Load price data for top 20 tickers and calculate returns
-prices = load_prices(top_20_tickers, start_date, end_date)
+# Load price and return data
+prices = load_prices(tickers, start_date, end_date)
 returns = prices.pct_change().dropna()
 
-# Sidebar for uploading custom returns data
+# Sidebar for uploading custom return data
 st.sidebar.header("Upload Returns Data")
 uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type=["csv"])
 
@@ -98,13 +60,13 @@ if uploaded_file:
     st.sidebar.success("✅ Custom dataset loaded")
 else:
     df = returns.copy()
-    st.sidebar.info("Using real return data for top 20 S&P 500 stocks")
+    st.sidebar.info("Using real return data for 20 selected US stocks")
 
-# Preview of return data
+# Show raw returns preview
 st.subheader("1. Preview of Return Data")
 st.dataframe(df.head())
 
-# CSV download button
+# Prepare CSV download
 csv_buffer = io.StringIO()
 df.to_csv(csv_buffer)
 csv_data = csv_buffer.getvalue()
@@ -232,39 +194,39 @@ else:
         """
     )
 
-# Portfolio return distribution
-st.subheader("4. Portfolio Return Distribution")
-fig2 = px.histogram(port_returns, nbins=50, title="Portfolio Return Distribution")
-st.plotly_chart(fig2, use_container_width=True)
-st.markdown(
-    """
-    This histogram shows the frequency distribution of daily portfolio returns.  
-    Key points to note:
-    
-    - The shape indicates how returns are distributed (normal, skewed, etc.).
-    - The center shows average returns.
-    - The tails highlight the probability of extreme losses or gains.
-    
-    Understanding this distribution is essential for assessing downside risk and portfolio behavior.
-    """
-)
+    # Return distribution
+    st.subheader("4. Portfolio Return Distribution")
+    fig2 = px.histogram(port_returns, nbins=50, title="Portfolio Return Distribution")
+    st.plotly_chart(fig2, use_container_width=True)
+    st.markdown(
+        """
+        This histogram shows the frequency distribution of daily portfolio returns.  
+        Key points to note:
+        
+        - The shape indicates how returns are distributed (normal, skewed, etc.).
+        - The center shows average returns.
+        - The tails highlight the probability of extreme losses or gains.
+        
+        Understanding this distribution is essential for assessing downside risk and portfolio behavior.
+        """
+    )
 
-# Cumulative returns
-st.subheader("5. Cumulative Returns")
-cum_returns = (1 + port_returns).cumprod()
-fig3 = px.line(cum_returns, title="Cumulative Return (Backtest)")
-st.plotly_chart(fig3, use_container_width=True)
-st.markdown(
-    """
-    This chart shows how an initial investment would have grown over time by compounding daily returns:
+    # Cumulative returns
+    st.subheader("5. Cumulative Returns")
+    cum_returns = (1 + port_returns).cumprod()
+    fig3 = px.line(cum_returns, title="Cumulative Return (Backtest)")
+    st.plotly_chart(fig3, use_container_width=True)
+    st.markdown(
+        """
+        This chart shows how an initial investment would have grown over time by compounding daily returns:
 
-    $$ V_t = V_0 \\times \\prod_{i=1}^t (1 + r_i) $$
+        $$ V_t = V_0 \\times \\prod_{i=1}^t (1 + r_i) $$
 
-    where:
-    - $V_t$ is portfolio value at time $t$,
-    - $V_0$ is the initial investment (normalized to 1),
-    - $r_i$ are daily portfolio returns.
+        where:
+        - $V_t$ is portfolio value at time $t$,
+        - $V_0$ is the initial investment (normalized to 1),
+        - $r_i$ are daily portfolio returns.
 
-    It provides a clear picture of growth trends and performance consistency.
-    """
-)
+        It provides a clear picture of growth trends and performance consistency.
+        """
+    )
