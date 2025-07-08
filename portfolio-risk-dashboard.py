@@ -84,6 +84,25 @@ corr = numeric_df.corr()
 fig1 = px.imshow(corr, text_auto=True, title="Asset Return Correlation")
 st.plotly_chart(fig1, use_container_width=True)
 
+# --- CORRELATION TABLE ---
+st.subheader("Top Pairwise Correlations")
+
+# Unstack the correlation matrix and filter out self-correlations
+corr_pairs = corr.unstack().reset_index()
+corr_pairs.columns = ['Asset 1', 'Asset 2', 'Correlation']
+corr_pairs = corr_pairs[corr_pairs['Asset 1'] != corr_pairs['Asset 2']]
+
+# Drop duplicate pairs (e.g., (AAPL, MSFT) and (MSFT, AAPL))
+corr_pairs['sorted_pair'] = corr_pairs.apply(lambda row: tuple(sorted([row['Asset 1'], row['Asset 2']])), axis=1)
+corr_pairs = corr_pairs.drop_duplicates('sorted_pair').drop(columns='sorted_pair')
+
+# Sort descending by correlation
+sorted_corrs = corr_pairs.sort_values(by="Correlation", ascending=False).reset_index(drop=True)
+
+# Display top N correlations (e.g., top 20)
+st.dataframe(sorted_corrs.head(20).style.format({"Correlation": "{:.2f}"}))
+
+
 st.markdown("The correlation matrix indicates how asset returns move together.")
 st.markdown("It is calculated using the Pearson correlation coefficient:")
 
