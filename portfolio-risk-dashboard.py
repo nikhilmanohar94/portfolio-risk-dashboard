@@ -95,9 +95,9 @@ Where:
 - $\sigma_i$, $\sigma_j$ are the standard deviations of the respective returns  
 
 **Interpretation:**  
-- $\rho = 1$: Perfect positive correlation  
-- $\rho = -1$: Perfect negative correlation  
-- $\rho = 0$: No linear relationship  
+- $\\rho = 1$: Perfect positive correlation  
+- $\\rho = -1$: Perfect negative correlation  
+- $\\rho = 0$: No linear relationship  
 
 Lower or negative correlations between assets improve diversification and reduce portfolio risk.
 """)
