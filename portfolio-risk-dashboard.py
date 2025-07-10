@@ -7,16 +7,16 @@ from datetime import datetime, timedelta
 import io
 
 st.set_page_config(page_title="Portfolio Risk Dashboard", layout="wide")
-st.title("📊 Portfolio Risk Dashboard")
+st.title("Equity Portfolio Risk Dashboard")
 
 st.markdown("""
-This interactive dashboard calculates key portfolio risk metrics and compares your portfolio to the S&P 500 benchmark.  
+This interactive dashboard calculates key portfolio risk metrics and compares your equity portfolio to the S&P 500 benchmark.  
 
 ### How to Use:
 1. By default, the app analyzes a portfolio of 20 major US stocks using 1 year of daily price data.
 2. You can adjust portfolio weights in the sidebar.
 3. Optionally upload your own return dataset.
-4. Visualizations include correlation, VaR, Sharpe ratio, volatility, distribution, and cumulative returns.
+4. Visualizations include correlation, VaR, Sharpe ratio, volatility, distribution, cumulative returns, and drawdown analysis.
 
 **Required Format for Upload:** CSV with dates as index and columns as asset returns.
 """)
