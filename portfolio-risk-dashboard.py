@@ -296,3 +296,23 @@ Where:
 
 This provides a direct benchmark comparison of total performance.
 """)
+
+# --- MAXIMUM DRAWDOWN CALCULATION ---
+st.subheader("6. Drawdown Analysis")
+
+# Calculate rolling maximum
+rolling_max = cum_port.cummax()
+
+# Calculate drawdown
+drawdown = (cum_port - rolling_max) / rolling_max
+max_drawdown = drawdown.min()
+
+# Plot drawdown
+fig4 = px.area(drawdown, title="Portfolio Drawdown Over Time")
+st.plotly_chart(fig4, use_container_width=True)
+
+# Display metrics
+col1, col2 = st.columns(2)
+col1.metric("Maximum Drawdown", f"{max_drawdown:.2%}")
+col2.metric("Worst Drawdown Period", 
+           f"{drawdown.idxmin().strftime('%Y-%m-%d')} to {drawdown.idxmax().strftime('%Y-%m-%d')}")
